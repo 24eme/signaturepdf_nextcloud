@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OCA\SignaturePDF\Listener;
+
+use OCA\SignaturePDF\AppInfo\Application;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\EventDispatcher\Event;
+use OCP\EventDispatcher\IEventListener;
+use OCP\IAppConfig;
+use OCP\Security\CSP\AddContentSecurityPolicyEvent;
+
+/**
+ * @template-implements IEventListener<AddContentSecurityPolicyEvent>
+ */
+class CSPListener implements IEventListener {
+
+	public function __construct(
+		private IAppConfig $appConfig,
+	)
+	{
+	}
+
+	public function handle(Event $event): void {
+		if (!($event instanceof AddContentSecurityPolicyEvent)) {
+			return;
+		}
+
+		$serverUrl = $this->appConfig->getValueString(Application::APP_ID, 'server_url', '');
+		$serverUrl = 'http://signaturepdf:9000';
+		if ($serverUrl === '') {
+			return;
+		}
+		// Allow the DocuSeal server URL for embedded signing and builder
+		$csp = new ContentSecurityPolicy();
+		$csp->addAllowedFrameDomain($serverUrl);
+		$csp->addAllowedConnectDomain($serverUrl);
+		$csp->addAllowedImageDomain($serverUrl);
+		$csp->addAllowedScriptDomain($serverUrl);
+		$csp->addAllowedFormActionDomain($serverUrl);
+
+		$event->addPolicy($csp);
+	}
+}
