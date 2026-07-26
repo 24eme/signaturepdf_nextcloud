@@ -65,10 +65,35 @@ class PageController extends Controller {
 		return new TemplateResponse(
 			Application::APP_ID,
 			'index',
-			['pdf' => $this->request->getParam('source')]
+			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => 'metadata']
 		);
 	}
 
+	#[NoCSRFRequired]
+	#[NoAdminRequired]
+	#[OpenAPI(OpenAPI::SCOPE_IGNORE)]
+	#[FrontpageRoute(verb: 'GET', url: '/signature')]
+	public function signature(): TemplateResponse {
+
+		return new TemplateResponse(
+			Application::APP_ID,
+			'index',
+			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => 'signature']
+		);
+	}
+
+	#[NoCSRFRequired]
+	#[NoAdminRequired]
+	#[OpenAPI(OpenAPI::SCOPE_IGNORE)]
+	#[FrontpageRoute(verb: 'GET', url: '/organization')]
+	public function organization(): TemplateResponse {
+
+		return new TemplateResponse(
+			Application::APP_ID,
+			'index',
+			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => 'organization']
+		);
+	}
 
 	#[NoCSRFRequired]
 	#[NoAdminRequired]

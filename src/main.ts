@@ -1,9 +1,3 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-
-const app = createApp(App)
-app.mount('#signaturepdf')
-
 let iframe = document.getElementById('iframe_pdf');
 iframe.onload = function() {
 }
