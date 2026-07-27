@@ -28,7 +28,7 @@ class CSPListener implements IEventListener {
 		}
 
 		$serverUrl = $this->appConfig->getValueString(Application::APP_ID, 'server_url', '');
-		$serverUrl = 'http://signaturepdf:9000';
+		$serverUrl = 'https://pdf.24eme.fr';
 		if ($serverUrl === '') {
 			return;
 		}
