@@ -98,6 +98,19 @@ class PageController extends Controller {
 	#[NoCSRFRequired]
 	#[NoAdminRequired]
 	#[OpenAPI(OpenAPI::SCOPE_IGNORE)]
+	#[FrontpageRoute(verb: 'GET', url: '/compress')]
+	public function compress(): TemplateResponse {
+
+		return new TemplateResponse(
+			Application::APP_ID,
+			'index',
+			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => 'compress']
+		);
+	}
+
+	#[NoCSRFRequired]
+	#[NoAdminRequired]
+	#[OpenAPI(OpenAPI::SCOPE_IGNORE)]
 	#[FrontpageRoute(verb: 'GET', url: '/onetime_webauth_token')]
 	public function generateOneTimeWebAuthToken(): DataResponse {		$sessionId = $this->session->getId();
 		try {
