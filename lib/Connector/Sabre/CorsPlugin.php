@@ -15,7 +15,7 @@ class CorsPlugin extends ServerPlugin {
 	private $origins;
 
 	public function __construct() {
-		$this->origins = ["http://signaturepdf:9000"];
+		$this->origins = ["https://pdf.24eme.fr"];
 	}
 
 	/**
