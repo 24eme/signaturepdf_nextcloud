@@ -2569,7 +2569,7 @@ registerFileAction({
   },
   exec: async (context) => {
     const file = context.nodes[0];
-    document.location = "/index.php/apps/signaturepdf_nextcloud/?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
+    document.location = "/index.php/apps/signaturepdf_nextcloud/metadata?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
   }
 });
 registerFileAction({

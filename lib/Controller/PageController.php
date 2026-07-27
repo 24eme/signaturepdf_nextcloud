@@ -19,6 +19,7 @@ use OCP\IRequest;
 use OCP\IUserSession;
 use OCP\Security\ISecureRandom;
 use OCP\ISession;
+use OCA\SignaturePDF\Config\Config;
 
 /**
  * @psalm-suppress UnusedClass
@@ -40,13 +41,19 @@ class PageController extends Controller {
 	/** @var ITimeFactory */
 	private $timeFactory;
 
+	/** @var Config */
+	private $config;
+
+
 	public function __construct($appName,
 			IRequest $request,
 			IProvider $tokenProvider,
 			ITimeFactory $timeFactory,
 			IUserSession $userSession,
 			ISession $session,
-			ISecureRandom $random) {
+			ISecureRandom $random,
+			Config $config,
+			) {
 			parent::__construct($appName, $request);
 
 			$this->tokenProvider = $tokenProvider;
@@ -54,18 +61,19 @@ class PageController extends Controller {
 			$this->userSession = $userSession;
 			$this->session = $session;
 			$this->random = $random;
+			$this->config = $config;
 }
 
 	#[NoCSRFRequired]
 	#[NoAdminRequired]
 	#[OpenAPI(OpenAPI::SCOPE_IGNORE)]
-	#[FrontpageRoute(verb: 'GET', url: '/')]
-	public function index(): TemplateResponse {
+	#[FrontpageRoute(verb: 'GET', url: '/metadata')]
+	public function metadata(): TemplateResponse {
 
 		return new TemplateResponse(
 			Application::APP_ID,
 			'index',
-			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => 'metadata']
+			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => $this->config->getInstance().'/metadata']
 		);
 	}
 
@@ -78,7 +86,7 @@ class PageController extends Controller {
 		return new TemplateResponse(
 			Application::APP_ID,
 			'index',
-			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => 'signature']
+			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => $this->config->getInstance().'/signature']
 		);
 	}
 
@@ -91,7 +99,7 @@ class PageController extends Controller {
 		return new TemplateResponse(
 			Application::APP_ID,
 			'index',
-			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => 'organization']
+			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => $this->config->getInstance().'/organization']
 		);
 	}
 
@@ -104,7 +112,7 @@ class PageController extends Controller {
 		return new TemplateResponse(
 			Application::APP_ID,
 			'index',
-			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => 'compress']
+			['pdf' => $this->request->getParam('source'), 'signaturepdf_url' => $this->config->getInstance().'/compress']
 		);
 	}
 
@@ -124,11 +132,6 @@ class PageController extends Controller {
 			} catch (InvalidTokenException) {
 				return $this->getServiceNotAvailableResponse();
 			}
-			// $groups = [];
-			// for ($i = 0; $i < 5; $i++) {
-			// 	$groups[] = $this->random->generate(5, ISecureRandom::CHAR_HUMAN_READABLE);
-			// }
-			// $token = implode('-', $groups);
 			$targetOrigin = $this->request->getHeader('target-origin');
 			$name = Application::TOKEN_NAME_PREFIX . $targetOrigin . ' ' . $this->request->getHeader('USER_AGENT');
 			$token = $this->random->generate(

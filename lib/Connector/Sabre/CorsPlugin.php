@@ -6,16 +6,17 @@ use Sabre\DAV\ServerPlugin;
 use Sabre\HTTP\RequestInterface;
 use Sabre\HTTP\ResponseInterface;
 use Sabre\HTTP\Sapi;
+use OCA\SignaturePDF\Config\Config;
 
 class CorsPlugin extends ServerPlugin {
 
 	/**
-	 * @var string[]
+	 * @var string
 	 */
-	private $origins;
+	private $instance;
 
-	public function __construct() {
-		$this->origins = ["https://pdf.24eme.fr"];
+	public function __construct(Config $config) {
+		$this->instance = $config->getInstance();
 	}
 
 	/**
@@ -37,7 +38,7 @@ class CorsPlugin extends ServerPlugin {
 		}
 
 		$origin = $request->getHeader('origin');
-		if (empty($origin) || !in_array($origin, $this->origins)) {
+		if (empty($origin) || !in_array($origin, [$this->instance])) {
 			return;
 		}
 

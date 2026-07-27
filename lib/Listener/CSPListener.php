@@ -8,16 +8,15 @@ use OCA\SignaturePDF\AppInfo\Application;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
-use OCP\IAppConfig;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
+use OCA\SignaturePDF\Config\Config;
 
 /**
  * @template-implements IEventListener<AddContentSecurityPolicyEvent>
  */
 class CSPListener implements IEventListener {
-
 	public function __construct(
-		private IAppConfig $appConfig,
+		private Config $config,
 	)
 	{
 	}
@@ -27,12 +26,12 @@ class CSPListener implements IEventListener {
 			return;
 		}
 
-		$serverUrl = $this->appConfig->getValueString(Application::APP_ID, 'server_url', '');
-		$serverUrl = 'https://pdf.24eme.fr';
-		if ($serverUrl === '') {
+		$serverUrl = $this->config->getInstance();
+
+		if (!$serverUrl) {
 			return;
 		}
-		// Allow the DocuSeal server URL for embedded signing and builder
+
 		$csp = new ContentSecurityPolicy();
 		$csp->addAllowedFrameDomain($serverUrl);
 		$csp->addAllowedConnectDomain($serverUrl);
