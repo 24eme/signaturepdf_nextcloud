@@ -23,7 +23,7 @@ use OCP\IContainer;
 use Psr\Log\LoggerInterface;
 
 class Application extends App implements IBootstrap {
-	public const APP_ID = 'signaturepdf_nextcloud';
+	public const APP_ID = 'signaturepdf';
 	private const CLEANUP_JOB_INTERVAL_CONFIG_KEY = 'cleanup_job_interval';
 	public const TOKEN_LIFETIME = 60;
 	public const TOKEN_NAME_PREFIX = 'SignaturePDF: ';

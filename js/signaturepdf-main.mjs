@@ -1,4 +1,4 @@
-const appName = "signaturepdf_nextcloud";
+const appName = "signaturepdf";
 const appVersion = "1.0.0";
 let iframe = document.getElementById("iframe_pdf");
 iframe.onload = function() {
@@ -16,4 +16,4 @@ window.addEventListener("message", async function(event) {
     }, "*");
   }
 });
-//# sourceMappingURL=signaturepdf_nextcloud-main.mjs.map
+//# sourceMappingURL=signaturepdf-main.mjs.map

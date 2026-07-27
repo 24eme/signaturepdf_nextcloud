@@ -1,4 +1,4 @@
-const appName = "signaturepdf_nextcloud";
+const appName = "signaturepdf";
 const appVersion = "1.0.0";
 function getDefaultExportFromCjs$1(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -1036,6 +1036,40 @@ window._nc_files_scope ??= {};
 window._nc_files_scope.v4_0 ??= {};
 const scopedGlobals = window._nc_files_scope.v4_0;
 const logger = getLoggerBuilder().setApp("@nextcloud/files").detectUser().build();
+const Permission = Object.freeze({
+  /**
+   * No permissions granted
+   */
+  NONE: 0,
+  /**
+   * Can read the file content
+   */
+  READ: 1,
+  /**
+   * Can modify the file itself (move, rename, etc)
+   */
+  UPDATE: 2,
+  /**
+   * Can create new files/folders inside a folder
+   */
+  CREATE: 4,
+  /**
+   * Can change the file content
+   */
+  WRITE: 4,
+  /**
+   * Can delete the node
+   */
+  DELETE: 8,
+  /**
+   * Can share the node
+   */
+  SHARE: 16,
+  /**
+   * All permissions are granted
+   */
+  ALL: 31
+});
 var e = class extends EventTarget {
   dispatchTypedEvent(s, t) {
     return super.dispatchEvent(t);
@@ -2555,8 +2589,30 @@ function validateAction$1(action) {
     }
   }
 }
+const SIGNATUREDPDF_MIMES = /* @__PURE__ */ new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/jpg"
+]);
+function nodeMime(node) {
+  return node?.mime || node?.mimetype || node?.attributes?.mime || "";
+}
+function isFilesAuthorized(nodes) {
+  if (!Array.isArray(nodes) || nodes.length !== 1) {
+    return false;
+  }
+  const node = nodes[0];
+  if (!SIGNATUREDPDF_MIMES.has(nodeMime(node))) {
+    return false;
+  }
+  if (typeof node.permissions === "number" && !(node.permissions & Permission.READ)) {
+    return false;
+  }
+  return true;
+}
 registerFileAction({
-  id: "signaturepdf_nextcloud",
+  id: "signaturepdf",
   displayName: () => "Manipuler le PDF",
   iconSvgInline: () => `<?xml version="1.0" encoding="UTF-8"?>
     <svg class="bi bi-vector-pen" width="128" height="128" fill="currentColor" version="1.1" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
@@ -2574,7 +2630,7 @@ registerFileAction({
      <text x="26.154791" y="115.48382" display="none" fill="#000000" font-family="Montserrat" font-size="35.547px" font-weight="bold" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.1194" style="line-height:0" xml:space="preserve"><tspan x="0" y="0" fill="#000000" font-family="'Montserrat Alternates'" font-weight="bold" stroke-width="1.1194">PDF</tspan></text>
     </svg>`,
   enabled(context) {
-    return context.nodes.length >= 1;
+    return isFilesAuthorized(context.nodes);
   },
   exec: async (context) => {
     return null;
@@ -2582,7 +2638,7 @@ registerFileAction({
   order: 99
 });
 registerFileAction({
-  id: "signaturepdf_nextcloud_signature",
+  id: "signaturepdf_signature",
   displayName: () => "Signer",
   iconSvgInline: () => `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-vector-pen" viewBox="0 0 16 16">
@@ -2591,16 +2647,16 @@ registerFileAction({
     </svg>
     `,
   enabled(context) {
-    return context.nodes.length >= 1;
+    return isFilesAuthorized(context.nodes);
   },
   exec: async (context) => {
     const file = context.nodes[0];
-    document.location = "/index.php/apps/signaturepdf_nextcloud/signature?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
+    document.location = "/index.php/apps/signaturepdf/signature?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
   },
-  parent: "signaturepdf_nextcloud"
+  parent: "signaturepdf"
 });
 registerFileAction({
-  id: "signaturepdf_nextcloud_organization",
+  id: "signaturepdf_organization",
   displayName: () => "Organiser",
   iconSvgInline: () => `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-ui-checks-grid" viewBox="0 0 16 16">
@@ -2608,16 +2664,16 @@ registerFileAction({
     </svg>
     `,
   enabled(context) {
-    return context.nodes.length >= 1;
+    return isFilesAuthorized(context.nodes);
   },
   exec: async (context) => {
     const file = context.nodes[0];
-    document.location = "/index.php/apps/signaturepdf_nextcloud/organization?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
+    document.location = "/index.php/apps/signaturepdf/organization?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
   },
-  parent: "signaturepdf_nextcloud"
+  parent: "signaturepdf"
 });
 registerFileAction({
-  id: "signaturepdf_nextcloud_metadata",
+  id: "signaturepdf_metadata",
   displayName: () => "Métadonnées",
   iconSvgInline: () => `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags" viewBox="0 0 16 16">
@@ -2626,16 +2682,16 @@ registerFileAction({
     </svg>
     `,
   enabled(context) {
-    return context.nodes.length >= 1;
+    return isFilesAuthorized(context.nodes);
   },
   exec: async (context) => {
     const file = context.nodes[0];
-    document.location = "/index.php/apps/signaturepdf_nextcloud/metadata?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
+    document.location = "/index.php/apps/signaturepdf/metadata?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
   },
-  parent: "signaturepdf_nextcloud"
+  parent: "signaturepdf"
 });
 registerFileAction({
-  id: "signaturepdf_nextcloud_compress",
+  id: "signaturepdf_compress",
   displayName: () => "Compresser",
   iconSvgInline: () => `
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-bar-contract" viewBox="0 0 16 16">
@@ -2643,12 +2699,12 @@ registerFileAction({
     </svg>
     `,
   enabled(context) {
-    return context.nodes.length >= 1;
+    return isFilesAuthorized(context.nodes);
   },
   exec: async (context) => {
     const file = context.nodes[0];
-    document.location = "/index.php/apps/signaturepdf_nextcloud/compress?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
+    document.location = "/index.php/apps/signaturepdf/compress?fileid=" + file.fileid + "&path=" + file.path + "&source=" + file.source;
   },
-  parent: "signaturepdf_nextcloud"
+  parent: "signaturepdf"
 });
-//# sourceMappingURL=signaturepdf_nextcloud-fileAction.mjs.map
+//# sourceMappingURL=signaturepdf-fileAction.mjs.map
